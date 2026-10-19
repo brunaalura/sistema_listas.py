@@ -1,72 +1,89 @@
-"""
-Sistema de Listas em página web (Streamlit)
-Os alunos podem: cadastrar, editar e excluir itens de uma lista.
+"""Sistema de lista (CRUD) em Python: adicionar, listar, alterar e excluir itens."""
 
-Para rodar:
-    pip install streamlit
-    streamlit run sistema_listas_web.py
-"""
-
-import streamlit as st
-
-st.set_page_config(page_title="Sistema de Listas", page_icon="📝")
-st.title("📝 Sistema de Listas")
-
-# O Streamlit executa o código de novo a cada clique.
-# Por isso a lista fica guardada no session_state, para não ser apagada.
-if "itens" not in st.session_state:
-    st.session_state.itens = []
-
-itens = st.session_state.itens
+itens = []
 
 
-# ----- Cadastrar -----
-with st.form("form_adicionar", clear_on_submit=True):
-    novo = st.text_input("Novo item")
-    enviado = st.form_submit_button("Adicionar")
-
-if enviado:
-    if novo.strip() == "":
-        st.warning("Digite algo antes de adicionar.")
+def mostrar_lista():
+    print("\n--- LISTA ---")
+    if not itens:
+        print("A lista está vazia.")
     else:
-        itens.append(novo.strip())
-        st.success(f"'{novo.strip()}' foi adicionado!")
+        for i, item in enumerate(itens, start=1):
+            print(f"{i}. {item}")
 
 
-# ----- Mostrar a lista -----
-st.subheader("Sua lista")
+def ler_posicao():
+    """Pede o número do item e devolve o índice (ou None se inválido)."""
+    try:
+        numero = int(input("Número do item: "))
+    except ValueError:
+        print("Digite um número válido.")
+        return None
+    if 1 <= numero <= len(itens):
+        return numero - 1
+    print("Posição inexistente.")
+    return None
 
-if len(itens) == 0:
-    st.info("A lista está vazia.")
-else:
-    for posicao, item in enumerate(itens, start=1):
-        st.write(f"{posicao}. {item}")
 
-    # ----- Editar ou excluir -----
-    st.divider()
-    st.subheader("Editar ou excluir")
+def adicionar():
+    nome = input("Novo item: ").strip()
+    if nome:
+        itens.append(nome)
+        print("Item adicionado!")
+    else:
+        print("O item não pode ser vazio.")
 
-    indice = st.selectbox(
-        "Escolha o item",
-        range(len(itens)),
-        format_func=lambda i: f"{i + 1}. {itens[i]}",
-    )
 
-    novo_texto = st.text_input(
-        "Texto do item",
-        value=itens[indice],
-        key=f"edit_{indice}_{itens[indice]}",
-    )
-
-    col1, col2 = st.columns(2)
-
-    if col1.button("Salvar edição"):
-        if novo_texto.strip() == "":
-            st.warning("O item não pode ficar vazio.")
+def alterar():
+    if not itens:
+        print("Não há itens para alterar.")
+        return
+    mostrar_lista()
+    pos = ler_posicao()
+    if pos is not None:
+        novo = input(f"Novo valor para '{itens[pos]}': ").strip()
+        if novo:
+            itens[pos] = novo
+            print("Item alterado!")
         else:
-            itens[indice] = novo_texto.strip()
-            st.rerun()
+            print("O item não pode ser vazio.")
 
-    if col2.button("Excluir"):
-        itens.pop(indice)
-        st.rerun()
+
+def excluir():
+    if not itens:
+        print("Não há itens para excluir.")
+        return
+    mostrar_lista()
+    pos = ler_posicao()
+    if pos is not None:
+        removido = itens.pop(pos)
+        print(f"Item '{removido}' excluído!")
+
+
+def menu():
+    while True:
+        print("\n===== MENU =====")
+        print("1 - Adicionar")
+        print("2 - Listar")
+        print("3 - Alterar")
+        print("4 - Excluir")
+        print("0 - Sair")
+        opcao = input("Escolha: ").strip()
+
+        if opcao == "1":
+            adicionar()
+        elif opcao == "2":
+            mostrar_lista()
+        elif opcao == "3":
+            alterar()
+        elif opcao == "4":
+            excluir()
+        elif opcao == "0":
+            print("Encerrando...")
+            break
+        else:
+            print("Opção inválida.")
+
+
+if __name__ == "__main__":
+    menu()
